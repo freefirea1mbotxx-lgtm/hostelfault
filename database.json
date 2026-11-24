@@ -1,0 +1,142 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "role": "student",
+      "matric": "CSC/2022/041",
+      "hostel": "Female Hostel 4",
+      "block": "C",
+      "room": 14,
+      "password": "123"
+    },
+    {
+      "id": "u2",
+      "role": "senate",
+      "staffId": "SEN-001",
+      "name": "Dr. Adebayo",
+      "password": "123"
+    },
+    {
+      "id": "u3",
+      "role": "works",
+      "staffId": "WRK-001",
+      "name": "Engr. Okafor",
+      "password": "123"
+    },
+    {
+      "id": "u_1794603250970",
+      "role": "student",
+      "matric": "2303030028",
+      "hostel": "Male Hostel 4",
+      "room": 1,
+      "password": "123"
+    }
+  ],
+  "faults": [
+    {
+      "id": "FLT-3901",
+      "hostel": "Male Hostel 4",
+      "block": null,
+      "room": 225,
+      "type": "socket",
+      "color": "green",
+      "description": "bad socket",
+      "reportedBy": "2303030028",
+      "status": "open",
+      "priority": false,
+      "x": 597,
+      "y": 413,
+      "createdAt": "2026-11-13T20:55:35.199Z"
+    },
+    {
+      "id": "FLT-1001",
+      "hostel": "Female Hostel 4",
+      "block": "C",
+      "room": 14,
+      "type": "socket",
+      "color": "green",
+      "description": "Wall socket sparking near study desk",
+      "reportedBy": "CSC/2022/041",
+      "status": "open",
+      "priority": true,
+      "x": 225,
+      "y": 405,
+      "createdAt": "2026-11-13T20:52:33.188Z"
+    },
+    {
+      "id": "FLT-1002",
+      "hostel": "Female Hostel 4",
+      "block": "C",
+      "room": 12,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Ceiling fan wobbling at high speed",
+      "reportedBy": "BIO/2023/112",
+      "status": "open",
+      "priority": false,
+      "x": 245,
+      "y": 418,
+      "createdAt": "2026-11-13T20:52:33.215Z"
+    },
+    {
+      "id": "FLT-1003",
+      "hostel": "Female Hostel 4",
+      "block": "C",
+      "room": 15,
+      "type": "locker",
+      "color": "pink",
+      "description": "Wardrobe locker hinge broken",
+      "reportedBy": "CHM/2022/089",
+      "status": "open",
+      "priority": false,
+      "x": 235,
+      "y": 395,
+      "createdAt": "2026-11-13T20:52:33.215Z"
+    },
+    {
+      "id": "FLT-1004",
+      "hostel": "Female Hostel 4",
+      "block": "C",
+      "room": 14,
+      "type": "socket",
+      "color": "green",
+      "description": "Extension port dead",
+      "reportedBy": "CSC/2022/041",
+      "status": "open",
+      "priority": false,
+      "x": 252,
+      "y": 402,
+      "createdAt": "2026-11-13T20:52:33.215Z"
+    },
+    {
+      "id": "FLT-1005",
+      "hostel": "Male Hostel 2",
+      "block": null,
+      "room": 8,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Regulator switch jammed",
+      "reportedBy": "ENG/2021/019",
+      "status": "open",
+      "priority": false,
+      "x": 650,
+      "y": 205,
+      "createdAt": "2026-11-13T20:52:33.215Z"
+    },
+    {
+      "id": "FLT-1006",
+      "hostel": "Female Hostel 1",
+      "block": null,
+      "room": 4,
+      "type": "locker",
+      "color": "pink",
+      "description": "Padlock latch bent",
+      "reportedBy": "LAW/2023/054",
+      "status": "open",
+      "priority": false,
+      "x": 185,
+      "y": 115,
+      "createdAt": "2026-11-13T20:52:33.215Z"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "role": "student",
+      "matric": "CSC/2022/041",
+      "hostel": "Female Hostel 4",
+      "block": 3,
+      "room": 14,
+      "password": "123"
+    },
+    {
+      "id": "u2",
+      "role": "student",
+      "matric": "ENG/2021/019",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 9,
+      "password": "123"
+    },
+    {
+      "id": "u3",
+      "role": "senate",
+      "staffId": "SEN-001",
+      "name": "Dr. Adebayo",
+      "password": "123"
+    },
+    {
+      "id": "u4",
+      "role": "works",
+      "staffId": "WRK-001",
+      "name": "Engr. Okafor",
+      "password": "123"
+    },
+    {
+      "id": "u_1794769912730",
+      "role": "student",
+      "matric": "2303030028",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 25,
+      "password": "123"
+    },
+    {
+      "id": "u_1795033178504",
+      "role": "student",
+      "matric": "1234567890",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 1,
+      "password": "help me"
+    }
+  ],
+  "faults": [
+    {
+      "id": "FLT-8251",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 3,
+      "type": "locker",
+      "color": "pink",
+      "description": "LOCKER fault reported",
+      "reportedBy": "Student (1234567890)",
+      "status": "open",
+      "priority": false,
+      "x": 78.27,
+      "y": 10.09,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (1234567890)",
+          "detail": "Logged LOCKER fault at Male Hostel 4 Block 2, Room 3: \"LOCKER fault reported\"",
+          "time": "18 Nov 2026, 21:21"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1004",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 9,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Fan regulator switch unresponsive",
+      "reportedBy": "ENG/2021/019",
+      "status": "open",
+      "priority": true,
+      "x": 615,
+      "y": 448,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (ENG/2021/019)",
+          "detail": "Submitted fan fault for MH4 Block 7, Room 9.",
+          "time": "14 Nov 2026, 06:54"
+        },
+        {
+          "title": "Moderator Priority Escalation",
+          "actor": "Moderator (System Moderator)",
+          "detail": "Moderator Priority Escalation",
+          "time": "14 Nov 2026, 06:55"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1005",
+      "hostel": "Male Hostel 2",
+      "block": null,
+      "room": 8,
+      "type": "socket",
+      "color": "green",
+      "description": "Wall outlet burnt out near entrance",
+      "reportedBy": "PHY/2022/011",
+      "status": "in_progress",
+      "priority": false,
+      "x": 680,
+      "y": 135,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (PHY/2022/011)",
+          "detail": "Submitted socket fault for Male Hostel 2, Room 8.",
+          "time": "14 Nov 2026, 06:54"
+        },
+        {
+          "title": "Moderator Dispatched Team",
+          "actor": "Moderator (System Moderator)",
+          "detail": "Moderator Dispatched Team",
+          "time": "14 Nov 2026, 06:56"
+        }
+      ]
+    }
+  ]
+}

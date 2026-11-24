@@ -1,0 +1,12 @@
+{
+  "name": "jabu-hostel-fault-portal",
+  "version": "1.0.0",
+  "description": "JABU Hostel Fault Management & Spatial GIS Portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

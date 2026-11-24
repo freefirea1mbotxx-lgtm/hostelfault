@@ -1,0 +1,319 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "role": "student",
+      "matric": "CSC/2022/041",
+      "hostel": "Female Hostel 4",
+      "block": 3,
+      "room": 14,
+      "password": "123"
+    },
+    {
+      "id": "u2",
+      "role": "student",
+      "matric": "ENG/2021/019",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 9,
+      "password": "123"
+    },
+    {
+      "id": "u3",
+      "role": "senate",
+      "staffId": "SEN-001",
+      "name": "Dr. Adebayo",
+      "password": "123"
+    },
+    {
+      "id": "u4",
+      "role": "works",
+      "staffId": "WRK-001",
+      "name": "Engr. Okafor",
+      "password": "123"
+    },
+    {
+      "id": "u_1794605360033",
+      "role": "student",
+      "matric": "2303030028",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 25,
+      "password": "123"
+    },
+    {
+      "id": "u_1794605743733",
+      "role": "student",
+      "matric": "CSC/2022/042",
+      "hostel": "Male Hostel 4",
+      "block": 1,
+      "room": 2,
+      "password": "help"
+    },
+    {
+      "id": "u_1794606089804",
+      "role": "student",
+      "matric": "CSC/2023/059",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 4,
+      "password": "419"
+    }
+  ],
+  "faults": [
+    {
+      "id": "FLT-7343",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 4,
+      "type": "socket",
+      "color": "green",
+      "description": "Only 2 sockets are functioning",
+      "reportedBy": "CSC/2023/059",
+      "status": "open",
+      "priority": false,
+      "x": 590,
+      "y": 353,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (CSC/2023/059)",
+          "detail": "Logged SOCKET fault at Male Hostel 4 Block 2, Room 4: \"Only 2 sockets are functioning\"",
+          "time": "13 Nov 2026, 22:42"
+        }
+      ]
+    },
+    {
+      "id": "FLT-5737",
+      "hostel": "Male Hostel 4",
+      "block": 1,
+      "room": 2,
+      "type": "fan",
+      "color": "yellow",
+      "description": "FAN fault reported",
+      "reportedBy": "CSC/2022/042",
+      "status": "open",
+      "priority": false,
+      "x": 527,
+      "y": 389,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (CSC/2022/042)",
+          "detail": "Logged FAN fault at Male Hostel 4 Block 1, Room 2: \"FAN fault reported\"",
+          "time": "13 Nov 2026, 22:37"
+        }
+      ]
+    },
+    {
+      "id": "FLT-2156",
+      "hostel": "Male Hostel 4",
+      "block": 1,
+      "room": 2,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Sir there’s heat in the room",
+      "reportedBy": "CSC/2022/042",
+      "status": "open",
+      "priority": false,
+      "x": 519,
+      "y": 357,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (CSC/2022/042)",
+          "detail": "Logged FAN fault at Male Hostel 4 Block 1, Room 2: \"Sir there’s heat in the room\"",
+          "time": "13 Nov 2026, 22:36"
+        }
+      ]
+    },
+    {
+      "id": "FLT-9270",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 25,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Blah blah",
+      "reportedBy": "2303030028",
+      "status": "open",
+      "priority": false,
+      "x": 601,
+      "y": 386,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (2303030028)",
+          "detail": "Logged FAN fault at Male Hostel 4 Block 2, Room 25: \"Blah blah\"",
+          "time": "13 Nov 2026, 22:29"
+        }
+      ]
+    },
+    {
+      "id": "FLT-5680",
+      "hostel": "Male Hostel 4",
+      "block": 2,
+      "room": 25,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Blah blah",
+      "reportedBy": "2303030028",
+      "status": "open",
+      "priority": false,
+      "x": 596,
+      "y": 363,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (2303030028)",
+          "detail": "Logged FAN fault at Male Hostel 4 Block 2, Room 25: \"Blah blah\"",
+          "time": "13 Nov 2026, 22:29"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1001",
+      "hostel": "Female Hostel 4",
+      "block": 3,
+      "room": 14,
+      "type": "socket",
+      "color": "green",
+      "description": "13A wall socket sparking near study desk",
+      "reportedBy": "CSC/2022/041",
+      "status": "in_progress",
+      "priority": true,
+      "x": 185,
+      "y": 382,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (CSC/2022/041)",
+          "detail": "Submitted socket fault for FH4 Block 3, Room 14.",
+          "time": "13 Nov 2026, 22:23"
+        },
+        {
+          "title": "Senate Escalation",
+          "actor": "Senate (Dr. Adebayo)",
+          "detail": "Marked HIGH PRIORITY due to electrical sparking hazard.",
+          "time": "13 Nov 2026, 22:23"
+        },
+        {
+          "title": "Technician Dispatched",
+          "actor": "Works Dept (Engr. Okafor)",
+          "detail": "Electrical unit assigned to inspect circuit breaker.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1002",
+      "hostel": "Female Hostel 4",
+      "block": 3,
+      "room": 12,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Ceiling fan wobbling at high speed",
+      "reportedBy": "BIO/2023/112",
+      "status": "open",
+      "priority": false,
+      "x": 192,
+      "y": 390,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (BIO/2023/112)",
+          "detail": "Submitted ceiling fan fault for FH4 Block 3, Room 12.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1003",
+      "hostel": "Female Hostel 4",
+      "block": 3,
+      "room": 15,
+      "type": "locker",
+      "color": "pink",
+      "description": "Steel wardrobe locker hinge detached",
+      "reportedBy": "CHM/2022/089",
+      "status": "open",
+      "priority": false,
+      "x": 178,
+      "y": 388,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (CHM/2022/089)",
+          "detail": "Submitted locker fault for FH4 Block 3, Room 15.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1004",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 9,
+      "type": "fan",
+      "color": "yellow",
+      "description": "Fan regulator switch unresponsive",
+      "reportedBy": "ENG/2021/019",
+      "status": "open",
+      "priority": false,
+      "x": 615,
+      "y": 448,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (ENG/2021/019)",
+          "detail": "Submitted fan fault for MH4 Block 7, Room 9.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1005",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 21,
+      "type": "socket",
+      "color": "green",
+      "description": "Twin socket outlet has no power",
+      "reportedBy": "PHY/2022/033",
+      "status": "open",
+      "priority": false,
+      "x": 622,
+      "y": 456,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (PHY/2022/033)",
+          "detail": "Submitted socket fault for MH4 Block 7, Room 21.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    },
+    {
+      "id": "FLT-1006",
+      "hostel": "Male Hostel 4",
+      "block": 7,
+      "room": 4,
+      "type": "locker",
+      "color": "pink",
+      "description": "Locker hasp bent; cannot lock",
+      "reportedBy": "MEE/2023/077",
+      "status": "open",
+      "priority": false,
+      "x": 608,
+      "y": 452,
+      "steps": [
+        {
+          "title": "Fault Reported",
+          "actor": "Student (MEE/2023/077)",
+          "detail": "Submitted locker fault for MH4 Block 7, Room 4.",
+          "time": "13 Nov 2026, 22:23"
+        }
+      ]
+    }
+  ]
+}

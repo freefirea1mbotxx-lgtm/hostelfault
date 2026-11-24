@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JABU Hostel Fault Management & Spatial Map</title>
+<style>
+  :root {
+    --bg: #eef2f6;
+    --surface: rgba(255, 255, 255, 0.92);
+    --surface-solid: #ffffff;
+    --surface-2: #e2e8f0;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: rgba(148, 163, 184, 0.35);
+    --accent: #1d4ed8;
+    --jabu-gold: #eab308;
+    --shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.14);
+  }
+  [data-theme="dark"] {
+    --bg: #070d19;
+    --surface: rgba(30, 41, 59, 0.88);
+    --surface-solid: #1e293b;
+    --surface-2: #334155;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --border: rgba(148, 163, 184, 0.22);
+    --accent: #3b82f6;
+    --shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.55);
+  }
+  * { box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    padding: 10px 24px; background: var(--surface); backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    border: 2px solid var(--jabu-gold); background: #fff;
+  }
+  .badge {
+    padding: 5px 13px; border-radius: 9999px; font-size: 12px; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--border);
+  }
+
+  button {
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface-solid); color: var(--text);
+    padding: 8px 16px; border-radius: 9999px; font-weight: 600; font-size: 12.5px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.2s ease;
+  }
+  button:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+  button:active { transform: translateY(0); }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  button.danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+  button.success { background: #15803d; color: #fff; border-color: #15803d; }
+  button.warn { background: #b45309; color: #fff; border-color: #b45309; }
+  button.sm { padding: 5px 12px; font-size: 11.5px; }
+
+  .hero-sticky {
+    position: sticky; top: 61px; z-index: 1;
+    padding: 20px 0 36px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #172554 100%);
+    color: #f8fafc; overflow: hidden;
+  }
+  .hero-head {
+    max-width: 1480px; margin: 0 auto 16px; padding: 0 24px;
+    display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 12px;
+  }
+  .hero-head h1 { margin: 0; font-size: 21px; letter-spacing: -0.02em; }
+  .hero-head p { margin: 4px 0 0; font-size: 13px; color: #cbd5e1; }
+
+  .marquee-wrap {
+    width: 100%; overflow: hidden;
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  }
+  .marquee-track {
+    display: flex; gap: 18px; width: max-content;
+    animation: scrollMarquee 28s linear infinite;
+  }
+  .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
+  @keyframes scrollMarquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .slide-card {
+    width: 310px; height: 175px; border-radius: 20px; overflow: hidden; position: relative;
+    border: 1px solid rgba(255,255,255,0.18); background: #0f172a;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.35); flex-shrink: 0;
+  }
+  .slide-card img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 0.6s ease;
+  }
+  .slide-card:hover img { transform: scale(1.06); }
+  .slide-caption {
+    position: absolute; inset: auto 0 0 0; padding: 10px 14px;
+    background: linear-gradient(to top, rgba(2,6,23,0.92), rgba(2,6,23,0.45), transparent);
+  }
+  .slide-tag {
+    display: inline-block; padding: 2px 9px; border-radius: 9999px; font-size: 10px; font-weight: 700;
+    background: #2563eb; color: #fff; margin-bottom: 3px;
+  }
+  .slide-title { font-size: 12.5px; font-weight: 700; color: #fff; }
+
+  .overlap-sheet {
+    position: relative; z-index: 10;
+    margin-top: -22px;
+    background: var(--bg);
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    box-shadow: 0 -18px 40px rgba(15, 23, 42, 0.22);
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .sheet-handle {
+    width: 46px; height: 5px; border-radius: 9999px; background: var(--border);
+    margin: 6px auto 4px;
+  }
+
+  .layout { display: grid; grid-template-columns: 1.55fr 1fr; gap: 20px; padding: 16px 22px 28px; max-width: 1520px; margin: auto; }
+  @media (max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); backdrop-filter: blur(12px);
+    border: 1px solid var(--border); border-radius: 22px; padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; align-items: center; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; margin-right: 5px; vertical-align: middle; }
+  .dot.green { background: #16a34a; }
+  .dot.yellow { background: #eab308; }
+  .dot.pink { background: #ec4899; }
+
+  /* AERIAL IMAGE MAP STAGE */
+  .aerial-map-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1080 / 1350;
+    max-height: 760px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #0f172a;
+    user-select: none;
+    touch-action: none;
+  }
+  .aerial-map-stage img.bg-aerial {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* UNIFIED HOSTEL ZONE BOX WITH DARK TINTED ROOF OVERLAY & COMPACT MICRO-TAG */
+  .hostel-zone-box {
+    position: absolute;
+    border: 1.5px solid rgba(96, 165, 250, 0.9);
+    background: rgba(2, 6, 23, 0.52);
+    border-radius: 6px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 2px;
+    box-sizing: border-box;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.45);
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .hostel-zone-box.female {
+    border-color: rgba(244, 114, 182, 0.9);
+    background: rgba(2, 6, 23, 0.52);
+  }
+  .hostel-zone-box.editing {
+    border: 1.5px dashed #eab308;
+    background: rgba(2, 6, 23, 0.65);
+    cursor: move;
+    z-index: 25;
+  }
+    .hostel-zone-label {
+    background: rgba(2, 6, 23, 0.88);
+    color: #f8fafc;
+    font-size: 8.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: visible;
+    max-width: none;
+    z-index: 20;
+  }
+  .zone-resize-grip {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 13px;
+    height: 13px;
+    background: #eab308;
+    border: 2px solid #0f172a;
+    border-radius: 3px;
+    cursor: nwse-resize;
+    display: none;
+    z-index: 30;
+  }
+  .hostel-zone-box.editing .zone-resize-grip {
+    display: block;
+  }
+
+  /* FAULT PINS & RED CLUSTER HALOS ON AERIAL PHOTO */
+  .fault-pin-dot {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid #0f172a;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.75);
+    transform: translate(-50%, -50%);
+    z-index: 18;
+    cursor: pointer;
+  }
+  .cluster-halo {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.36);
+    border: 2px solid #dc2626;
+    transform: translate(-50%, -50%);
+    z-index: 15;
+    pointer-events: none;
+  }
+
+  .mod-editor-bar {
+    margin-top: 10px; padding: 10px 14px; border-radius: 14px;
+    background: rgba(234, 179, 8, 0.14); border: 1px solid rgba(234, 179, 8, 0.45);
+    display: none; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+  }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 10px; flex-wrap: wrap; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  input, select, textarea {
+    width: 100%; padding: 9px 14px; margin-top: 4px; margin-bottom: 10px;
+    border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 13px;
+    outline: none; transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { border-radius: 16px; }
+  label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; padding-left: 4px; }
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .matrix-tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+  .blocks-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  @media (max-width: 640px) { .blocks-grid { grid-template-columns: repeat(2, 1fr); } }
+  .block-card { border: 1px solid var(--border); border-radius: 12px; padding: 7px; background: var(--bg); }
+  .rooms-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-top: 4px; }
+  .room-cell {
+    font-size: 10px; text-align: center; padding: 3px 0; border-radius: 6px;
+    background: var(--surface-solid); border: 1px solid var(--border); cursor: pointer;
+  }
+  .room-cell.fault-open { background: #dc2626; color: #fff; font-weight: 700; border-color: #991b1b; }
+  .room-cell.fault-prog { background: #d97706; color: #fff; font-weight: 700; border-color: #92400e; }
+
+  details.hostel-drop {
+    border: 1px solid var(--border); border-radius: 16px; margin-bottom: 10px; background: var(--bg); overflow: hidden;
+  }
+  details.hostel-drop > summary {
+    padding: 11px 14px; font-weight: 700; font-size: 13px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center; background: var(--surface-2);
+    list-style: none;
+  }
+  details.hostel-drop > summary::-webkit-details-marker { display: none; }
+  details.block-drop {
+    border: 1px solid var(--border); border-radius: 12px; margin: 8px; background: var(--surface-solid); overflow: hidden;
+  }
+  details.block-drop > summary {
+    padding: 8px 12px; font-weight: 600; font-size: 12.5px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .drop-body { padding: 10px; }
+
+  .fault-card {
+    border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin-bottom: 10px; background: var(--surface-solid);
+  }
+  .timeline {
+    margin-top: 10px; padding-left: 14px; border-left: 2px solid var(--accent);
+  }
+  .step-item { position: relative; margin-bottom: 8px; font-size: 12px; }
+  .step-item::before {
+    content: ""; position: absolute; left: -19px; top: 4px; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--accent);
+  }
+  .step-meta { font-size: 11px; color: var(--muted); }
+  .lock-banner {
+    padding: 16px; border-radius: 16px; background: var(--bg); border: 1px dashed var(--border);
+    text-align: center; font-size: 13px; color: var(--muted); margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="/images/jabu-logo.jpg" alt="JABU Crest" onerror="this.style.display='none'">
+    <div>
+      <strong style="font-size:15px; display:block;">JOSEPH AYO BABALOLA UNIVERSITY (JABU)</strong>
+      <span style="font-size:11.5px; color:var(--muted);">Hostel Fault Management &amp; Campus Spatial Map</span>
+    </div>
+  </div>
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <span class="badge" id="userBadge">Locked — Sign In Required</span>
+    <button id="logoutBtn" style="display:none;" onclick="logout()">Sign Out</button>
+    <button onclick="toggleTheme()">Dark / Light Mode</button>
+  </div>
+</header>
+
+<!-- STICKY HERO WITH AUTO-SCROLLING BLUE-UNIFORM WORKS GALLERY -->
+<section class="hero-sticky">
+  <div class="hero-head">
+    <div>
+      <h1>JABU Campus Infrastructure &amp; Hostel Maintenance Portal</h1>
+      <p>Ikeji-Arakeji • 4 Female Hostels &amp; 4 Male Hostels • Aerial Spatial Map &amp; Works Dispatch</p>
+    </div>
+    <span class="badge" style="background:rgba(255,255,255,0.14); color:#fff; border-color:rgba(255,255,255,0.25);">
+      Works Dept Uniform: Royal Blue
+    </span>
+  </div>
+
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marqueeTrack">
+      <div class="slide-card">
+        <img src="https://th.bing.com/th/id/OIP.FwUoZKezC3C9KeDBznAEIwHaGE?w=198&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Blue Uniform Maintenance Technician">
+        <div class="slide-caption">
+          <span class="slide-tag">WORKS DEPT • BLUE UNIFORM</span>
+          <div class="slide-title">Electrical &amp; Hostel Facility Maintenance</div>
+        </div>
+      </div>
+
+      <div class="slide-card">
+        <img src="https://th.bing.com/th/id/OIP.bv9ZH-aS5tc9t5QAkYaCHwHaEK?w=281&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Technician in Blue Work Uniform">
+        <div class="slide-caption">
+          <span class="slide-tag">TECHNICAL UNIT • BLUE UNIFORM</span>
+          <div class="slide-title">Fan, Socket &amp; Fittings Servicing</div>
+        </div>
+      </div>
+
+      <div class="slide-card">
+        <img src="https://th.bing.com/th/id/OIP.MqM_7H9VjDyOepQmzHCHLQHaFW?w=217&h=180&c=7&r=0&o=7&pid=1.7&rm=3" alt="Works Engineer in Blue Uniform">
+        <div class="slide-caption">
+          <span class="slide-tag">INFRASTRUCTURE TEAM • BLUE UNIFORM</span>
+          <div class="slide-title">Preventive Hostel Maintenance Dispatch</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OVERLAPPING GLASSMORPHIC WORKSPACE SHEET -->
+<main class="overlap-sheet">
+  <div class="sheet-handle"></div>
+
+  <div class="layout">
+    <!-- LEFT COLUMN: AERIAL CAMPUS PHOTO MAP & UNIFIED MODERATOR BOX EDITOR -->
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
+        <h3 style="margin:0; font-size:15px;">JABU Aerial Hostel Map &amp; Fault Density</h3>
+        <div class="legend">
+          <span><i class="dot green"></i>Socket</span>
+          <span><i class="dot yellow"></i>Fan</span>
+          <span><i class="dot pink"></i>Locker</span>
+          <span style="color:#dc2626; font-weight:700;">● Red Zone = Critical Cluster (3+ Faults)</span>
+        </div>
+      </div>
+
+      <div class="aerial-map-stage" id="aerialMapStage">
+        <img class="bg-aerial" id="aerialBgImg" src="/images/jabu-aerial-map.jpg" alt="JABU Aerial Campus Map"
+             onerror="document.getElementById('missingAerialNotice').style.display='flex';">
+        <div id="missingAerialNotice" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; padding:24px; text-align:center; color:#e2e8f0; background:rgba(15,23,42,0.85); z-index:5;">
+          <div>
+            <strong>Aerial Map Image Not Found Yet</strong><br>
+            <span style="font-size:12px; color:#94a3b8;">Save your JABU aerial photo as <code>public\images\jabu-aerial-map.jpg</code> or sign in as Moderator and click <strong>Upload Aerial Image</strong> below.</span>
+          </div>
+        </div>
+        <div id="zonesOverlayLayer"></div>
+        <div id="faultPinsOverlayLayer"></div>
+      </div>
+
+      <!-- MODERATOR INTERACTIVE BOX EDITOR BAR -->
+      <div id="modMapEditorBar" class="mod-editor-bar">
+        <div style="font-size:12px;">
+          <strong>Moderator Box Editor:</strong>
+          <span id="editorStatusText" style="color:var(--muted);">Drag any box (name moves with it) &amp; pull gold corner to resize.</span>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <input type="file" id="aerialFileInput" accept="image/*" style="display:none;" onchange="uploadAerialPhoto(event)">
+          <button class="sm" onclick="document.getElementById('aerialFileInput').click()">Upload Aerial Image</button>
+          <button class="sm primary" id="toggleZoneEditBtn" onclick="toggleZoneEditor()">Edit Hostel Boxes</button>
+          <button class="sm success" id="saveZonesBtn" style="display:none;" onclick="saveCalibratedZones()">Save Layout</button>
+          <button class="sm warn" id="resetZonesBtn" style="display:none;" onclick="resetDefaultZones()">Reset Boxes</button>
+        </div>
+      </div>
+
+      <!-- PROTECTED ROOM MATRIX -->
+      <div id="matrixLockedNotice" class="lock-banner">
+        <strong>Protected Campus Telemetry:</strong> Sign in on the right to unlock active fault pins on the aerial photo and the FH4 / MH4 room fault matrix.
+      </div>
+
+      <div id="matrixContainer" style="margin-top:14px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+          <div class="matrix-tabs" style="margin:0;">
+            <button id="matBtnFH4" class="primary sm" onclick="selectMatrixHostel('Female Hostel 4')">Female Hostel 4 (Blocks 1–10)</button>
+            <button id="matBtnMH4" class="sm" onclick="selectMatrixHostel('Male Hostel 4')">Male Hostel 4 (Blocks 1–10)</button>
+          </div>
+          <span style="font-size:11.5px; color:var(--muted);">
+            <strong style="color:#dc2626;">Red</strong> = Open Fault | <strong style="color:#d97706;">Amber</strong> = Works Dispatched
+          </span>
+        </div>
+        <div class="blocks-grid" id="roomMatrixGrid"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: CLEAN AUTHENTICATION, REPORT FAULT, DROPDOWN COMPLAINTS & MODERATOR PANEL -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" id="tabAuthBtn" onclick="switchTab('auth')">1. Sign In / Sign Up</button>
+        <button class="tab" id="tabReportBtn" onclick="switchTab('report')" style="display:none;">2. Report Fault</button>
+        <button class="tab" id="tabTrackBtn" onclick="switchTab('track')" style="display:none;">3. Complaints (<span id="activeCount">0</span>)</button>
+        <button class="tab" id="tabModBtn" onclick="switchTab('mod')" style="display:none;">4. Moderator</button>
+      </div>
+
+      <!-- TAB 1: CLEAN AUTHENTICATION -->
+      <div id="tabAuth">
+        <div style="display:flex; gap:8px; margin-bottom:14px;">
+          <button id="modeLoginBtn" class="primary" onclick="setAuthMode('login')">Sign In</button>
+          <button id="modeSignupBtn" class="btn" onclick="setAuthMode('signup')">Sign Up</button>
+        </div>
+
+        <label>Account Role</label>
+        <select id="authRole" onchange="updateAuthFields()">
+          <option value="student">Student</option>
+          <option value="senate">Senate</option>
+          <option value="works">Works Department</option>
+        </select>
+
+        <div id="studentAuthFields">
+          <label>Matric Number</label>
+          <input id="authMatric" autocomplete="off" placeholder="Enter Matric Number">
+
+          <label>Hostel</label>
+          <select id="authHostel" onchange="toggleAuthBlock()">
+            <option value="" disabled selected>Select Hostel</option>
+            <option value="Female Hostel 1">Female Hostel 1</option>
+            <option value="Female Hostel 2">Female Hostel 2</option>
+            <option value="Female Hostel 3">Female Hostel 3</option>
+            <option value="Female Hostel 4">Female Hostel 4</option>
+            <option value="Male Hostel 1">Male Hostel 1</option>
+            <option value="Male Hostel 2">Male Hostel 2</option>
+            <option value="Male Hostel 3">Male Hostel 3</option>
+            <option value="Male Hostel 4">Male Hostel 4</option>
+          </select>
+
+          <div class="row-2">
+            <div id="authBlockWrap" style="display:none;">
+              <label>Block (1–10 for FH4/MH4)</label>
+              <select id="authBlock">
+                <option value="" disabled selected>Select Block</option>
+                <option value="1">Block 1</option><option value="2">Block 2</option>
+                <option value="3">Block 3</option><option value="4">Block 4</option>
+                <option value="5">Block 5</option><option value="6">Block 6</option>
+                <option value="7">Block 7</option><option value="8">Block 8</option>
+                <option value="9">Block 9</option><option value="10">Block 10</option>
+              </select>
+            </div>
+            <div>
+              <label>Room Number (1–25)</label>
+              <input id="authRoom" type="number" min="1" max="25" autocomplete="off" placeholder="Room (1–25)">
+            </div>
+          </div>
+        </div>
+
+        <div id="staffAuthFields" style="display:none;">
+          <label>Staff ID</label>
+          <input id="authStaffId" autocomplete="off" placeholder="Enter Staff ID">
+
+          <div id="senateKeyWrap" style="display:none;">
+            <label>Senate Authorization Key</label>
+            <input id="authSenateKey" type="password" autocomplete="new-password" placeholder="Enter Senate Authorization Key">
+          </div>
+
+          <div id="staffSignupNameWrap" style="display:none;">
+            <label>Official Full Name</label>
+            <input id="authName" autocomplete="off" placeholder="Enter Full Name">
+          </div>
+        </div>
+
+        <label>Password</label>
+        <input id="authPassword" type="password" autocomplete="new-password" placeholder="Enter Password">
+
+        <button class="primary" style="width:100%;" onclick="submitAuth()">Continue</button>
+        <p id="authMsg" style="color:#dc2626; font-size:12.5px; margin-top:8px;"></p>
+      </div>
+
+      <!-- TAB 2: REPORT FAULT -->
+      <div id="tabReport" style="display:none;">
+        <label>Hostel</label>
+        <select id="repHostel" onchange="toggleReportBlock()">
+          <option value="Female Hostel 1">Female Hostel 1</option>
+          <option value="Female Hostel 2">Female Hostel 2</option>
+          <option value="Female Hostel 3">Female Hostel 3</option>
+          <option value="Female Hostel 4" selected>Female Hostel 4</option>
+          <option value="Male Hostel 1">Male Hostel 1</option>
+          <option value="Male Hostel 2">Male Hostel 2</option>
+          <option value="Male Hostel 3">Male Hostel 3</option>
+          <option value="Male Hostel 4">Male Hostel 4</option>
+        </select>
+
+        <div class="row-2">
+          <div id="repBlockWrap">
+            <label>Block (1–10 for FH4/MH4)</label>
+            <select id="repBlock">
+              <option value="1">Block 1</option><option value="2">Block 2</option>
+              <option value="3">Block 3</option><option value="4">Block 4</option>
+              <option value="5">Block 5</option><option value="6">Block 6</option>
+              <option value="7">Block 7</option><option value="8">Block 8</option>
+              <option value="9">Block 9</option><option value="10">Block 10</option>
+            </select>
+          </div>
+          <div>
+            <label>Room Number (1–25)</label>
+            <input id="repRoom" type="number" min="1" max="25" placeholder="Room (1–25)">
+          </div>
+        </div>
+
+        <label>Fault Category (Map Pin Color)</label>
+        <select id="repType">
+          <option value="socket">Socket Fault (Green Dot)</option>
+          <option value="fan">Fan Fault (Yellow Dot)</option>
+          <option value="locker">Locker Fault (Pink Dot)</option>
+        </select>
+
+        <label>Fault Description</label>
+        <textarea id="repDesc" rows="3" placeholder="Specify exact issue in the room..."></textarea>
+
+        <button class="primary" style="width:100%;" onclick="submitFault()">Submit &amp; Pin on Aerial Map</button>
+      </div>
+
+      <!-- TAB 3: HOSTEL & BLOCK DROPDOWN COMPLAINT EXPLORER -->
+      <div id="tabTrack" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <strong style="font-size:13px;">Complaints by Hostel &amp; Block</strong>
+          <button class="sm" onclick="refreshState()">Refresh</button>
+        </div>
+        <div id="accordionComplaints"></div>
+      </div>
+
+      <!-- TAB 4: MODERATOR MASTER CONTROL PANEL -->
+      <div id="tabMod" style="display:none;">
+        <h4 style="margin-top:0; margin-bottom:8px;">Moderator System Control</h4>
+        <p style="font-size:12px; color:var(--muted); margin-top:0;">
+          Use <strong>Edit Hostel Boxes</strong> below the aerial map to drag any box (its name moves inside it) and drag the bottom-right gold handle to resize. Manage registered accounts below:
+        </p>
+        <div id="modUserList"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+let currentUser = null;
+let authMode = 'login';
+let faults = [];
+let registeredUsers = [];
+let matrixHostel = 'Female Hostel 4';
+let isZoneEditing = false;
+
+const ALL_HOSTELS = [
+  'Female Hostel 1', 'Female Hostel 2', 'Female Hostel 3', 'Female Hostel 4',
+  'Male Hostel 1', 'Male Hostel 2', 'Male Hostel 3', 'Male Hostel 4'
+];
+
+// Percentage-based boxes (left%, top%, width%, height%) matched to the aerial photo layout
+function buildDefaultPercentZones() {
+  return {
+    // Top-Left Courtyard Compound (10 Blocks)
+    'Female Hostel 4 - Block 1':  { x: 21.0, y: 12.0, w: 9.0, h: 7.5 },
+    'Female Hostel 4 - Block 2':  { x: 30.5, y: 11.5, w: 9.0, h: 7.5 },
+    'Female Hostel 4 - Block 3':  { x: 3.8,  y: 21.5, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 4':  { x: 13.2, y: 22.0, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 5':  { x: 22.6, y: 22.5, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 6':  { x: 32.0, y: 23.0, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 7':  { x: 3.0,  y: 30.2, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 8':  { x: 12.5, y: 30.8, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 9':  { x: 22.0, y: 31.3, w: 9.0, h: 7.8 },
+    'Female Hostel 4 - Block 10': { x: 31.5, y: 31.8, w: 9.0, h: 7.8 },
+
+    // Top-Right Courtyard Compound (10 Blocks)
+    'Male Hostel 4 - Block 1':    { x: 75.0, y: 0.5,  w: 9.0, h: 7.2 },
+    'Male Hostel 4 - Block 2':    { x: 76.2, y: 8.2,  w: 9.0, h: 7.2 },
+    'Male Hostel 4 - Block 3':    { x: 58.5, y: 9.5,  w: 9.0, h: 7.5 },
+    'Male Hostel 4 - Block 4':    { x: 52.0, y: 19.0, w: 9.0, h: 7.5 },
+    'Male Hostel 4 - Block 5':    { x: 61.2, y: 18.0, w: 9.0, h: 7.5 },
+    'Male Hostel 4 - Block 6':    { x: 70.0, y: 17.0, w: 9.0, h: 7.5 },
+    'Male Hostel 4 - Block 7':    { x: 78.8, y: 16.0, w: 9.0, h: 7.5 },
+    'Male Hostel 4 - Block 8':    { x: 53.5, y: 27.2, w: 9.0, h: 7.8 },
+    'Male Hostel 4 - Block 9':    { x: 62.5, y: 26.2, w: 9.0, h: 7.8 },
+    'Male Hostel 4 - Block 10':   { x: 71.5, y: 25.2, w: 9.0, h: 7.8 },
+
+    // Lower Campus Hostels (FH 1-3 & MH 1-3)
+    'Female Hostel 1': { x: 15.0, y: 61.5, w: 8.0, h: 10.0 },
+    'Female Hostel 2': { x: 23.5, y: 61.0, w: 13.5, h: 11.0 },
+    'Female Hostel 3': { x: 37.5, y: 64.0, w: 8.0, h: 16.0 },
+    'Male Hostel 1':   { x: 77.0, y: 50.0, w: 13.0, h: 18.0 },
+    'Male Hostel 2':   { x: 89.0, y: 58.0, w: 8.5, h: 11.5 },
+    'Male Hostel 3':   { x: 73.0, y: 74.0, w: 13.5, h: 9.5 }
+  };
+}
+
+let campusZones = buildDefaultPercentZones();
+
+function hasBlocks(h) {
+  return h === 'Female Hostel 4' || h === 'Male Hostel 4';
+}
+
+function getZoneKey(hostel, block) {
+  return hasBlocks(hostel) ? `${hostel} - Block ${block || 1}` : hostel;
+}
+
+function initInfiniteMarquee() {
+  const track = document.getElementById('marqueeTrack');
+  track.innerHTML = track.innerHTML + track.innerHTML;
+}
+
+function toggleTheme() {
+  const dark = document.body.getAttribute('data-theme') === 'dark';
+  document.body.setAttribute('data-theme', dark ? 'light' : 'dark');
+}
+
+async function loadSavedZones() {
+  try {
+    const res = await fetch('/api/zones');
+    const data = await res.json();
+    // Only load percentage-based zones (x/y/w/h in 0-100 range)
+    if (data.zones && data.zones['Female Hostel 1'] && typeof data.zones['Female Hostel 1'].w === 'number') {
+      campusZones = { ...buildDefaultPercentZones(), ...data.zones };
+    }
+  } catch (e) {}
+  renderZoneBoxes();
+}
+
+// UNIFIED RENDER: Label is a child inside the box, so dragging moves BOTH together!
+function renderZoneBoxes() {
+  const layer = document.getElementById('zonesOverlayLayer');
+  const stage = document.getElementById('aerialMapStage');
+  if (!layer || !stage) return;
+
+  layer.innerHTML = '';
+
+  // --- COMPOUND BANNERS ---
+  const compoundHeaders = [
+    { key: '_LABEL_FEMALE', text: 'FEMALE HOSTEL 4', bg: 'rgba(236, 72, 153, 0.94)', defX: 16, defY: 7 },
+    { key: '_LABEL_MALE',   text: 'MALE HOSTEL 4',   bg: 'rgba(37, 99, 235, 0.94)',  defX: 60, defY: 5 }
+  ];
+
+  compoundHeaders.forEach(ch => {
+    if (!campusZones[ch.key]) {
+      campusZones[ch.key] = { x: ch.defX, y: ch.defY, w: 18, h: 4, isBanner: true };
+    }
+    const bz = campusZones[ch.key];
+    const banner = document.createElement('div');
+    banner.textContent = ch.text;
+    banner.style.cssText = `position:absolute; left:${bz.x}%; top:${bz.y}%; background:${ch.bg}; color:#fff; font-size:10.5px; font-weight:800; letter-spacing:0.06em; padding:3px 10px; border-radius:9999px; border:1.5px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.65); z-index:24; white-space:nowrap; user-select:none; ${isZoneEditing ? 'cursor:move; outline:2px dashed #eab308;' : 'pointer-events:none;'}`;
+
+    if (isZoneEditing && currentUser && currentUser.role === 'moderator') {
+      banner.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        banner.setPointerCapture(e.pointerId);
+        const rect = stage.getBoundingClientRect();
+        const startX = e.clientX, startY = e.clientY;
+        const origX = bz.x, origY = bz.y;
+        const onMove = (ev) => {
+          bz.x = Number(Math.max(0, Math.min(88, origX + ((ev.clientX - startX) / rect.width) * 100)).toFixed(2));
+          bz.y = Number(Math.max(0, Math.min(95, origY + ((ev.clientY - startY) / rect.height) * 100)).toFixed(2));
+          banner.style.left = bz.x + '%';
+          banner.style.top = bz.y + '%';
+        };
+        const onUp = () => {
+          banner.removeEventListener('pointermove', onMove);
+          banner.removeEventListener('pointerup', onUp);
+        };
+        banner.addEventListener('pointermove', onMove);
+        banner.addEventListener('pointerup', onUp);
+      });
+    }
+    layer.appendChild(banner);
+  });
+  // --- END COMPOUND BANNERS ---
+
+  
+  Object.entries(campusZones).forEach(([zoneKey, z]) => { if (z.isBanner || zoneKey.startsWith('_LABEL_')) return; if (z.isBanner || zoneKey.startsWith('_LABEL_')) return;
+    const isFemale = zoneKey.startsWith('Female');
+        const shortLabel = zoneKey
+      .replace('Female Hostel 4 - Block ', 'B')
+      .replace('Male Hostel 4 - Block ', 'B')
+      .replace('Female Hostel ', 'FH')
+      .replace('Male Hostel ', 'MH');
+
+    const box = document.createElement('div');
+    box.className = `hostel-zone-box ${isFemale ? 'female' : ''} ${isZoneEditing ? 'editing' : ''}`;
+    box.style.left = z.x + '%';
+    box.style.top = z.y + '%';
+    box.style.width = z.w + '%';
+    box.style.height = z.h + '%';
+
+    const label = document.createElement('span');
+    label.className = 'hostel-zone-label';
+    label.textContent = shortLabel;
+    box.appendChild(label);
+
+    const grip = document.createElement('div');
+    grip.className = 'zone-resize-grip';
+    box.appendChild(grip);
+
+    if (isZoneEditing && currentUser && currentUser.role === 'moderator') {
+      // Drag whole box (label moves smoothly inside it)
+      box.addEventListener('pointerdown', (e) => {
+        if (e.target === grip) return;
+        e.preventDefault();
+        box.setPointerCapture(e.pointerId);
+        const rect = stage.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origX = z.x;
+        const origY = z.y;
+
+        const onMove = (ev) => {
+          const dxPct = ((ev.clientX - startX) / rect.width) * 100;
+          const dyPct = ((ev.clientY - startY) / rect.height) * 100;
+          z.x = Number(Math.max(0, Math.min(100 - z.w, origX + dxPct)).toFixed(2));
+          z.y = Number(Math.max(0, Math.min(100 - z.h, origY + dyPct)).toFixed(2));
+          box.style.left = z.x + '%';
+          box.style.top = z.y + '%';
+        };
+
+        const onUp = () => {
+          box.removeEventListener('pointermove', onMove);
+          box.removeEventListener('pointerup', onUp);
+        };
+
+        box.addEventListener('pointermove', onMove);
+        box.addEventListener('pointerup', onUp);
+      });
+
+      // Resize box using bottom-right gold handle
+      grip.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        grip.setPointerCapture(e.pointerId);
+        const rect = stage.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const origW = z.w;
+        const origH = z.h;
+
+        const onResize = (ev) => {
+          const dwPct = ((ev.clientX - startX) / rect.width) * 100;
+          const dhPct = ((ev.clientY - startY) / rect.height) * 100;
+          z.w = Number(Math.max(3, Math.min(100 - z.x, origW + dwPct)).toFixed(2));
+          z.h = Number(Math.max(3, Math.min(100 - z.y, origH + dhPct)).toFixed(2));
+          box.style.width = z.w + '%';
+          box.style.height = z.h + '%';
+        };
+
+        const onUp = () => {
+          grip.removeEventListener('pointermove', onResize);
+          grip.removeEventListener('pointerup', onUp);
+        };
+
+        grip.addEventListener('pointermove', onResize);
+        grip.addEventListener('pointerup', onUp);
+      });
+    }
+
+    layer.appendChild(box);
+  });
+}
+
+function toggleZoneEditor() {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  isZoneEditing = !isZoneEditing;
+  document.getElementById('toggleZoneEditBtn').textContent = isZoneEditing ? 'Stop Editing' : 'Edit Hostel Boxes';
+  document.getElementById('saveZonesBtn').style.display = isZoneEditing ? 'inline-block' : 'none';
+  document.getElementById('resetZonesBtn').style.display = isZoneEditing ? 'inline-block' : 'none';
+  document.getElementById('editorStatusText').textContent = isZoneEditing
+    ? 'Drag ANY box to move (name moves with it) • Drag GOLD corner square to resize.'
+    : 'Drag any box (name moves with it) & pull gold corner to resize.';
+  renderZoneBoxes();
+}
+
+async function saveCalibratedZones() {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  const res = await fetch('/api/zones', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actorRole: 'moderator', zones: campusZones })
+  });
+  if (res.ok) {
+    isZoneEditing = false;
+    document.getElementById('toggleZoneEditBtn').textContent = 'Edit Hostel Boxes';
+    document.getElementById('saveZonesBtn').style.display = 'none';
+    document.getElementById('resetZonesBtn').style.display = 'none';
+    document.getElementById('editorStatusText').textContent = 'Box positions and sizes saved!';
+    renderZoneBoxes();
+    renderAll();
+  }
+}
+
+function resetDefaultZones() {
+  if (!confirm('Reset all hostel boxes back to default positions?')) return;
+  campusZones = buildDefaultPercentZones();
+  renderZoneBoxes();
+}
+
+async function uploadAerialPhoto(event) {
+  const file = event.target.files[0];
+  if (!file || !currentUser || currentUser.role !== 'moderator') return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    const res = await fetch('/api/map-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ actorRole: 'moderator', imageData: reader.result })
+    });
+    if (res.ok) {
+      document.getElementById('missingAerialNotice').style.display = 'none';
+      document.getElementById('aerialBgImg').src = '/images/jabu-aerial-map.jpg?t=' + Date.now();
+      document.getElementById('editorStatusText').textContent = 'Aerial map photo uploaded and applied!';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearAuthInputs() {
+  document.getElementById('authMatric').value = '';
+  document.getElementById('authHostel').value = '';
+  document.getElementById('authBlock').value = '';
+  document.getElementById('authBlockWrap').style.display = 'none';
+  document.getElementById('authRoom').value = '';
+  document.getElementById('authStaffId').value = '';
+  document.getElementById('authSenateKey').value = '';
+  document.getElementById('authName').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authMsg').textContent = '';
+}
+
+function switchTab(tab) {
+  ['auth', 'report', 'track', 'mod'].forEach(t => {
+    const cap = t[0].toUpperCase() + t.slice(1);
+    document.getElementById('tab' + cap).style.display = t === tab ? 'block' : 'none';
+    document.getElementById('tab' + cap + 'Btn').classList.toggle('active', t === tab);
+  });
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.getElementById('modeLoginBtn').classList.toggle('primary', mode === 'login');
+  document.getElementById('modeSignupBtn').classList.toggle('primary', mode === 'signup');
+  updateAuthFields();
+}
+
+function updateAuthFields() {
+  const role = document.getElementById('authRole').value;
+  document.getElementById('studentAuthFields').style.display = role === 'student' ? 'block' : 'none';
+  document.getElementById('staffAuthFields').style.display = role !== 'student' ? 'block' : 'none';
+  document.getElementById('senateKeyWrap').style.display = (role === 'senate' && authMode === 'signup') ? 'block' : 'none';
+  document.getElementById('staffSignupNameWrap').style.display = (role !== 'student' && authMode === 'signup') ? 'block' : 'none';
+}
+
+function toggleAuthBlock() {
+  const h = document.getElementById('authHostel').value;
+  document.getElementById('authBlockWrap').style.display = hasBlocks(h) ? 'block' : 'none';
+}
+
+function toggleReportBlock() {
+  const h = document.getElementById('repHostel').value;
+  document.getElementById('repBlockWrap').style.display = hasBlocks(h) ? 'block' : 'none';
+}
+
+async function submitAuth() {
+  const role = document.getElementById('authRole').value;
+  const password = document.getElementById('authPassword').value;
+  const msg = document.getElementById('authMsg');
+  msg.textContent = '';
+
+  const endpoint = authMode === 'login' ? '/api/auth/login' : '/api/auth/signup';
+  const hostel = document.getElementById('authHostel').value;
+  const payload = role === 'student'
+    ? {
+        role,
+        identifier: document.getElementById('authMatric').value.trim(),
+        matric: document.getElementById('authMatric').value.trim(),
+        hostel,
+        block: hasBlocks(hostel) ? Number(document.getElementById('authBlock').value) : null,
+        room: Number(document.getElementById('authRoom').value),
+        password
+      }
+    : {
+        role,
+        identifier: document.getElementById('authStaffId').value.trim(),
+        staffId: document.getElementById('authStaffId').value.trim(),
+        senateKey: document.getElementById('authSenateKey').value.trim(),
+        name: document.getElementById('authName').value.trim(),
+        password
+      };
+
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    msg.textContent = data.error || 'Authentication error.';
+    return;
+  }
+
+  currentUser = data.user;
+  clearAuthInputs();
+  document.getElementById('logoutBtn').style.display = 'inline-block';
+  document.getElementById('matrixLockedNotice').style.display = 'none';
+  document.getElementById('matrixContainer').style.display = 'block';
+  document.getElementById('tabTrackBtn').style.display = 'inline-block';
+
+  if (currentUser.role === 'moderator') {
+    document.getElementById('userBadge').textContent = 'MODERATOR (Full System Control)';
+    document.getElementById('tabReportBtn').style.display = 'inline-block';
+    document.getElementById('tabModBtn').style.display = 'inline-block';
+    document.getElementById('modMapEditorBar').style.display = 'flex';
+    await refreshState();
+    switchTab('track');
+  } else if (currentUser.role === 'student') {
+    const blkText = currentUser.block ? ` • Blk ${currentUser.block}` : '';
+    document.getElementById('userBadge').textContent = `Student: ${currentUser.matric} (${currentUser.hostel}${blkText} • Rm ${currentUser.room})`;
+    document.getElementById('tabReportBtn').style.display = 'inline-block';
+    document.getElementById('tabModBtn').style.display = 'none';
+    document.getElementById('modMapEditorBar').style.display = 'none';
+    document.getElementById('repHostel').value = currentUser.hostel;
+    toggleReportBlock();
+    if (currentUser.block) document.getElementById('repBlock').value = currentUser.block;
+    document.getElementById('repRoom').value = currentUser.room;
+    await refreshState();
+    switchTab('report');
+  } else {
+    document.getElementById('userBadge').textContent = `${currentUser.role.toUpperCase()}: ${currentUser.name} (${currentUser.staffId})`;
+    document.getElementById('tabReportBtn').style.display = 'none';
+    document.getElementById('tabModBtn').style.display = 'none';
+    document.getElementById('modMapEditorBar').style.display = 'none';
+    await refreshState();
+    switchTab('track');
+  }
+}
+
+function logout() {
+  currentUser = null;
+  faults = [];
+  registeredUsers = [];
+  isZoneEditing = false;
+  clearAuthInputs();
+  document.getElementById('userBadge').textContent = 'Locked — Sign In Required';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('matrixLockedNotice').style.display = 'block';
+  document.getElementById('matrixContainer').style.display = 'none';
+  document.getElementById('modMapEditorBar').style.display = 'none';
+  document.getElementById('tabReportBtn').style.display = 'none';
+  document.getElementById('tabTrackBtn').style.display = 'none';
+  document.getElementById('tabModBtn').style.display = 'none';
+  document.getElementById('faultPinsOverlayLayer').innerHTML = '';
+  renderZoneBoxes();
+  document.getElementById('accordionComplaints').innerHTML = '';
+  switchTab('auth');
+}
+
+function computeCoords(hostel, block) {
+  const zKey = getZoneKey(hostel, block);
+  const z = campusZones[zKey];
+  if (z) {
+    return {
+      x: Number((z.x + z.w * (0.2 + Math.random() * 0.6)).toFixed(2)),
+      y: Number((z.y + z.h * (0.2 + Math.random() * 0.6)).toFixed(2))
+    };
+  }
+  return { x: 50, y: 50 };
+}
+
+async function submitFault() {
+  if (!currentUser || (currentUser.role !== 'student' && currentUser.role !== 'moderator')) {
+    alert('Only signed-in Students or the Moderator can submit fault reports.');
+    return;
+  }
+  const hostel = document.getElementById('repHostel').value;
+  const block = hasBlocks(hostel) ? Number(document.getElementById('repBlock').value) : null;
+  const room = Number(document.getElementById('repRoom').value);
+  const type = document.getElementById('repType').value;
+  const description = document.getElementById('repDesc').value.trim() || `${type.toUpperCase()} fault reported`;
+  const { x, y } = computeCoords(hostel, block);
+
+  const res = await fetch('/api/faults', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hostel, block, room, type, description,
+      reportedBy: currentUser.role === 'moderator' ? 'Moderator' : `Student (${currentUser.matric})`,
+      x, y
+    })
+  });
+  if (res.ok) {
+    document.getElementById('repDesc').value = '';
+    if (hasBlocks(hostel)) selectMatrixHostel(hostel);
+    await refreshState();
+    switchTab('track');
+  }
+}
+
+async function recordAction(faultId, actionType) {
+  if (!currentUser || currentUser.role === 'student') return;
+  const noteInput = document.getElementById('note_' + faultId);
+  const note = noteInput ? noteInput.value.trim() : '';
+
+  await fetch(`/api/faults/${faultId}/action`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      actorRole: currentUser.role,
+      actorName: currentUser.name || currentUser.staffId || 'Moderator',
+      actionType,
+      note
+    })
+  });
+  await refreshState();
+}
+
+async function saveModFaultEdit(faultId) {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  const hostel = document.getElementById(`mod_h_${faultId}`).value;
+  const block = hasBlocks(hostel) ? Number(document.getElementById(`mod_b_${faultId}`).value) : null;
+  const room = Number(document.getElementById(`mod_r_${faultId}`).value);
+  const type = document.getElementById(`mod_t_${faultId}`).value;
+  const status = document.getElementById(`mod_s_${faultId}`).value;
+  const description = document.getElementById(`mod_d_${faultId}`).value.trim();
+  const { x, y } = computeCoords(hostel, block);
+
+  await fetch(`/api/faults/${faultId}/edit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      actorRole: 'moderator',
+      hostel, block, room, type, status, description, x, y
+    })
+  });
+  await refreshState();
+}
+
+async function deleteModFault(faultId) {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  if (!confirm(`Delete fault ticket ${faultId} permanently?`)) return;
+  await fetch(`/api/faults/${faultId}/delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actorRole: 'moderator' })
+  });
+  await refreshState();
+}
+
+async function deleteModUser(userId) {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  if (!confirm('Remove this user account?')) return;
+  await fetch(`/api/users/${userId}/delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actorRole: 'moderator' })
+  });
+  await refreshState();
+}
+
+function selectMatrixHostel(hostelName) {
+  matrixHostel = hostelName;
+  document.getElementById('matBtnFH4').classList.toggle('primary', hostelName === 'Female Hostel 4');
+  document.getElementById('matBtnMH4').classList.toggle('primary', hostelName === 'Male Hostel 4');
+  renderRoomMatrix();
+}
+
+async function refreshState() {
+  if (!currentUser) return;
+  await loadSavedZones();
+  const res = await fetch('/api/state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: currentUser.id, role: currentUser.role })
+  });
+  if (!res.ok) return;
+  const data = await res.json();
+  faults = data.faults || [];
+  registeredUsers = data.users || [];
+  renderAll();
+}
+
+function renderRoomMatrix() {
+  if (!currentUser) return;
+  const activeFaults = faults.filter(f => f.status !== 'resolved' && f.hostel === matrixHostel);
+  let html = '';
+  for (let b = 1; b <= 10; b++) {
+    let rooms = '';
+    for (let r = 1; r <= 25; r++) {
+      const rf = activeFaults.filter(f => Number(f.block) === b && Number(f.room) === r);
+      let cls = '';
+      if (rf.some(f => f.status === 'open')) cls = 'fault-open';
+      else if (rf.some(f => f.status === 'in_progress')) cls = 'fault-prog';
+      rooms += `<div class="room-cell ${cls}" title="${matrixHostel} Block ${b}, Room ${r} (${rf.length} active)">${r}</div>`;
+    }
+    html += `<div class="block-card"><strong style="font-size:11px;">Block ${b}</strong><div class="rooms-grid">${rooms}</div></div>`;
+  }
+  document.getElementById('roomMatrixGrid').innerHTML = html;
+}
+
+function renderFaultCard(f) {
+  const isSenate = currentUser && (currentUser.role === 'senate' || currentUser.role === 'moderator');
+  const isWorks = currentUser && (currentUser.role === 'works' || currentUser.role === 'moderator');
+  const isMod = currentUser && currentUser.role === 'moderator';
+
+  const loc = `${f.hostel}${f.block ? ' • Block ' + f.block : ''} • Room ${f.room}`;
+  const statusBadge = f.status === 'resolved'
+    ? '<span class="badge" style="background:#15803d;color:#fff;">RESOLVED</span>'
+    : f.status === 'in_progress'
+      ? '<span class="badge" style="background:#d97706;color:#fff;">IN PROGRESS</span>'
+      : '<span class="badge" style="background:#dc2626;color:#fff;">OPEN</span>';
+
+  const stepsHtml = (f.steps || []).map(s => `
+    <div class="step-item">
+      <strong>${s.title}</strong> — <span>${s.detail}</span>
+      <div class="step-meta">${s.actor} • ${s.time}</div>
+    </div>
+  `).join('');
+
+  let controlsHtml = '';
+  if (isSenate || isWorks) {
+    controlsHtml = `
+      <div style="margin-top:10px; padding-top:8px; border-top:1px dashed var(--border);">
+        <input id="note_${f.id}" placeholder="Add official decision / work step note..." style="margin-bottom:6px; padding:6px 12px; font-size:12px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          ${isSenate ? `
+            <button class="sm danger" onclick="recordAction('${f.id}', '${f.priority ? 'deescalate' : 'escalate'}')">
+              ${f.priority ? 'Clear Priority' : 'Senate Escalate'}
+            </button>
+            <button class="sm primary" onclick="recordAction('${f.id}', 'senate_directive')">Log Directive</button>
+          ` : ''}
+          ${isWorks && f.status !== 'resolved' ? `
+            <button class="sm warn" onclick="recordAction('${f.id}', 'dispatch')">Dispatch Team</button>
+            <button class="sm success" onclick="recordAction('${f.id}', 'resolve')">Mark Resolved</button>
+          ` : ''}
+          ${f.status === 'resolved' ? `
+            <button class="sm" onclick="recordAction('${f.id}', 'reopen')">Reopen</button>
+          ` : ''}
+          ${isMod ? `
+            <button class="sm danger" onclick="deleteModFault('${f.id}')">Delete</button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  let modEditHtml = '';
+  if (isMod) {
+    const hostelOpts = ALL_HOSTELS.map(h => `<option ${f.hostel === h ? 'selected' : ''}>${h}</option>`).join('');
+    let blkOpts = '';
+    for (let i = 1; i <= 10; i++) {
+      blkOpts += `<option value="${i}" ${Number(f.block) === i ? 'selected' : ''}>Block ${i}</option>`;
+    }
+    modEditHtml = `
+      <details style="margin-top:8px; border-top:1px solid var(--border); padding-top:6px;">
+        <summary style="font-size:11.5px; font-weight:700; cursor:pointer; color:var(--accent);">Moderator Edit Fault Fields</summary>
+        <div style="margin-top:8px;">
+          <label>Hostel</label>
+          <select id="mod_h_${f.id}">${hostelOpts}</select>
+          <div class="row-2">
+            <div>
+              <label>Block (FH4/MH4)</label>
+              <select id="mod_b_${f.id}">${blkOpts}</select>
+            </div>
+            <div>
+              <label>Room (1–25)</label>
+              <input id="mod_r_${f.id}" type="number" min="1" max="25" value="${f.room}">
+            </div>
+          </div>
+          <div class="row-2">
+            <div>
+              <label>Category</label>
+              <select id="mod_t_${f.id}">
+                <option value="socket" ${f.type === 'socket' ? 'selected' : ''}>Socket (Green)</option>
+                <option value="fan" ${f.type === 'fan' ? 'selected' : ''}>Fan (Yellow)</option>
+                <option value="locker" ${f.type === 'locker' ? 'selected' : ''}>Locker (Pink)</option>
+              </select>
+            </div>
+            <div>
+              <label>Status</label>
+              <select id="mod_s_${f.id}">
+                <option value="open" ${f.status === 'open' ? 'selected' : ''}>Open</option>
+                <option value="in_progress" ${f.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
+                <option value="resolved" ${f.status === 'resolved' ? 'selected' : ''}>Resolved</option>
+              </select>
+            </div>
+          </div>
+          <label>Description</label>
+          <input id="mod_d_${f.id}" value="${f.description.replace(/"/g, '&quot;')}">
+          <button class="sm primary" onclick="saveModFaultEdit('${f.id}')">Save Changes</button>
+        </div>
+      </details>
+    `;
+  }
+
+  return `
+    <div class="fault-card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px; flex-wrap:wrap;">
+        <div>
+          <span class="dot ${f.color}"></span>
+          <strong style="font-size:13px;">${loc}</strong>
+          <span style="font-size:11px; color:var(--muted);">(${f.id})</span>
+        </div>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          ${f.priority ? '<span class="badge" style="background:#991b1b;color:#fff;">PRIORITY</span>' : ''}
+          ${statusBadge}
+        </div>
+      </div>
+      <div style="font-size:12.5px; margin-top:4px;"><strong>${f.type.toUpperCase()}:</strong> ${f.description}</div>
+      <div class="timeline">${stepsHtml}</div>
+      ${controlsHtml}
+      ${modEditHtml}
+    </div>
+  `;
+}
+
+function renderDropdownComplaints() {
+  const container = document.getElementById('accordionComplaints');
+  container.innerHTML = ALL_HOSTELS.map(hostelName => {
+    const hFaults = faults.filter(f => f.hostel === hostelName);
+    const activeCount = hFaults.filter(f => f.status !== 'resolved').length;
+
+    let innerHtml = '';
+    if (hasBlocks(hostelName)) {
+      for (let b = 1; b <= 10; b++) {
+        const bFaults = hFaults.filter(f => Number(f.block) === b);
+        const bActive = bFaults.filter(f => f.status !== 'resolved').length;
+        innerHtml += `
+          <details class="block-drop" ${bActive > 0 ? 'open' : ''}>
+            <summary>
+              <span>Block ${b} (Rooms 1–25)</span>
+              <span class="badge">${bFaults.length} total • ${bActive} active</span>
+            </summary>
+            <div class="drop-body">
+              ${bFaults.length ? bFaults.map(renderFaultCard).join('') : '<p style="font-size:12px; color:var(--muted); margin:0;">No complaints logged in Block ' + b + '.</p>'}
+            </div>
+          </details>
+        `;
+      }
+    } else {
+      innerHtml = `
+        <div class="drop-body">
+          ${hFaults.length ? hFaults.map(renderFaultCard).join('') : '<p style="font-size:12px; color:var(--muted); margin:0;">No complaints logged in ' + hostelName + '.</p>'}
+        </div>
+      `;
+    }
+
+    return `
+      <details class="hostel-drop" ${activeCount > 0 ? 'open' : ''}>
+        <summary>
+          <span>▼ ${hostelName}</span>
+          <span class="badge">${hFaults.length} complaints (${activeCount} active)</span>
+        </summary>
+        ${innerHtml}
+      </details>
+    `;
+  }).join('');
+}
+
+function renderModeratorUsers() {
+  if (!currentUser || currentUser.role !== 'moderator') return;
+  const list = document.getElementById('modUserList');
+  list.innerHTML = registeredUsers.map(u => `
+    <div class="fault-card" style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <strong>${u.role.toUpperCase()}</strong>: ${u.matric || u.staffId}
+        <div style="font-size:11.5px; color:var(--muted);">
+          ${u.role === 'student' ? `${u.hostel}${u.block ? ' • Block ' + u.block : ''} • Room ${u.room}` : u.name}
+        </div>
+      </div>
+      <button class="sm danger" onclick="deleteModUser('${u.id}')">Remove</button>
+    </div>
+  `).join('') || '<p style="font-size:12px; color:var(--muted);">No registered accounts found.</p>';
+}
+
+function renderAll() {
+  if (!currentUser) return;
+
+  const activeFaults = faults.filter(f => f.status !== 'resolved');
+  document.getElementById('activeCount').textContent = activeFaults.length;
+
+  const pinsLayer = document.getElementById('faultPinsOverlayLayer');
+  pinsLayer.innerHTML = '';
+
+  const colorHex = { green: '#16a34a', yellow: '#eab308', pink: '#ec4899' };
+  const clusterCounts = {};
+  const clusterZones = {};
+
+  activeFaults.forEach(f => {
+    const zKey = getZoneKey(f.hostel, f.block);
+    clusterCounts[zKey] = (clusterCounts[zKey] || 0) + 1;
+    if (campusZones[zKey]) clusterZones[zKey] = campusZones[zKey];
+  });
+
+  // Red Critical Cluster Halos (3+ active faults)
+  Object.entries(clusterCounts).forEach(([zKey, count]) => {
+    if (count >= 3 && clusterZones[zKey]) {
+      const z = clusterZones[zKey];
+      const halo = document.createElement('div');
+      halo.className = 'cluster-halo';
+      halo.style.left = (z.x + z.w / 2) + '%';
+      halo.style.top = (z.y + z.h / 2) + '%';
+      pinsLayer.appendChild(halo);
+    }
+  });
+
+  // Color-Coded Fault Pins anchored inside their calibrated hostel/block box
+  activeFaults.forEach(f => {
+    const zKey = getZoneKey(f.hostel, f.block);
+    const z = campusZones[zKey];
+    let px = 50, py = 50;
+
+    if (z) {
+      const hash = (f.id || '0').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+      px = z.x + z.w * (0.25 + ((hash % 11) / 20));
+      py = z.y + z.h * (0.25 + (((hash * 7) % 11) / 20));
+    }
+
+    const loc = `${f.hostel}${f.block ? ' • Block ' + f.block : ''} • Room ${f.room}`;
+    const pin = document.createElement('div');
+    pin.className = 'fault-pin-dot';
+    pin.style.left = px + '%';
+    pin.style.top = py + '%';
+    pin.style.background = colorHex[f.color] || '#16a34a';
+    pin.title = `${loc} — ${f.type.toUpperCase()}: ${f.description}`;
+    pinsLayer.appendChild(pin);
+  });
+
+  renderRoomMatrix();
+  renderDropdownComplaints();
+  renderModeratorUsers();
+}
+
+initInfiniteMarquee();
+loadSavedZones();
+clearAuthInputs();
+</script>
+</body>
+</html>
